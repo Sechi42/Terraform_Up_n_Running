@@ -5,11 +5,17 @@ provider "aws" {
 terraform {
     backend "s3" {
         bucket         = "terraform-up-and-running-state-evolu"
-        key            = "global/s3/terraform.statte"
+        key            = "workspaces-example/terraform.statte"
         region         = "us-east-2"
         dynamodb_table = "terraform-up-and-running-locks"
         encrypt        = true
     }
+}
+
+resource "aws_instance" "example" {
+    ami           = "ami-0fb653ca2d3203ac1"
+    instance_type = terraform.workspace == "default" ? "t2.medium" : "t2.micro"
+  
 }
 
 resource "aws_s3_bucket" "terraform_state" {
@@ -64,3 +70,4 @@ output "dynamodb_table_name" {
     value = aws_dynamodb_table.terraform_locks.arn
     description = "The name of the DynamoDB table"
 }
+
