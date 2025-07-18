@@ -9,6 +9,8 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   - `pruebas/` contiene ejemplos, incluyendo errores de tipo intencionados para aprendizaje.
   - Estructura por ambientes (`stage`, `prod`, `mgmt`, `global`) y dominios (por ejemplo, `services/webserver-cluster`).
   - Cada servicio o dominio se organiza en subcarpetas con archivos `main.tf`, `variables.tf` y `outputs.tf` para parametrización y reutilización.
+  - Se recomienda la integración entre servicios usando `terraform_remote_state` para consumir outputs de otros stacks (por ejemplo, el clúster webserver obtiene la dirección y puerto de la base de datos MySQL).
+  - El uso de `aws_launch_template` y `user_data` dinámico con `templatefile` permite pasar variables y endpoints entre servicios de forma segura y DRY.
   - Provisión de recursos globales (IAM, S3) bajo `global/`.
   - Uso de outputs para exponer información clave de los recursos y facilitar la integración entre módulos.
   - `export_env.sh` para la configuración del entorno.
@@ -37,7 +39,30 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
 - AWS es el proveedor principal; asegúrate de definir las credenciales mediante variables de entorno o archivos `.env`.
 - El estado remoto utiliza S3 y DynamoDB (ver `Chapter_3/global` y archivos de backend en cada ambiente).
 
-## Ejemplos
+- Para inicializar y aplicar un servicio en un ambiente (por ejemplo, webserver-cluster en stage):
+  ```bash
+  cd Chapter_3/stage/services/webserver-cluster
+  terraform init
+  terraform apply
+  ```
+- Para consumir outputs de otro stack (por ejemplo, la dirección de la base de datos MySQL en el clúster webserver):
+  ```hcl
+  data "terraform_remote_state" "example" {
+    backend = "s3"
+    config = {
+      bucket = "terraform-up-and-running-state-evolu"
+      key    = "stage/data-stores/mysql/terraform.statte"
+      region = "us-east-2"
+    }
+  }
+  # Uso en recursos:
+  db_address = data.terraform_remote_state.example.outputs.address
+  db_port    = data.terraform_remote_state.example.outputs.port
+  ```
+- Para destruir recursos:
+  ```bash
+  terraform destroy
+  ```
 - Para inicializar y aplicar el Capítulo 2:
   ```bash
   cd Chapter_2
