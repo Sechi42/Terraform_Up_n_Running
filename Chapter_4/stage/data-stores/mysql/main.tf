@@ -2,11 +2,28 @@ provider "aws" {
     region = "us-east-2"
 }
 
-module "web-cluster" {
-    source = "../../../modules/services/webserver-cluster"
+terraform {
+    backend "s3" {
+        bucket         = "terraform-up-and-running-state-evolu"
+        key            = "stage/data-stores/mysql/terraform.statte"
+        region         = "us-east-2"
+        dynamodb_table = "terraform-up-and-running-locks"
+        encrypt        = true
+    }
+}
 
-    cluster_name = "webservers-stage"
-    db_remote_state_bucket = "terraform-up-and-running-stage"
-    db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
+
+resource "aws_db_instance" "example" {
+    identifier_prefix   = "terraform-up-and-running"
+    engine              = "mysql"
+    allocated_storage   = 10
+    instance_class      = "db.t3.micro"
+    skip_final_snapshot = true
+    db_name             = "example_database"
+
+    # How should we set he username and password
+    username            = var.db_username
+    password            = var.db_password
+  
 }
 
