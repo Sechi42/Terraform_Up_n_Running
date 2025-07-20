@@ -9,10 +9,12 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   - `pruebas/` contiene ejemplos, incluyendo errores de tipo intencionados para aprendizaje.
   - Estructura por ambientes (`stage`, `prod`, `mgmt`, `global`) y dominios (por ejemplo, `services/webserver-cluster`).
   - Cada servicio o dominio se organiza en subcarpetas con archivos `main.tf`, `variables.tf` y `outputs.tf` para parametrización y reutilización.
+  - Los módulos deben exponer recursos clave (por ejemplo, IDs de security groups, nombres de ASG, DNS de ALB) mediante outputs en `outputs.tf`.
+  - Para agregar reglas adicionales a un security group creado en un módulo, usa el output correspondiente (`security_group_id`) y crea recursos `aws_security_group_rule` en el root module o ambiente deseado, apuntando a ese ID. Así puedes personalizar reglas por ambiente sin modificar el módulo base.
   - Se recomienda la integración entre servicios usando `terraform_remote_state` para consumir outputs de otros stacks (por ejemplo, el clúster webserver obtiene la dirección y puerto de la base de datos MySQL).
   - El uso de `aws_launch_template` y `user_data` dinámico con `templatefile` permite pasar variables y endpoints entre servicios de forma segura y DRY.
   - Provisión de recursos globales (IAM, S3) bajo `global/`.
-  - Uso de outputs para exponer información clave de los recursos y facilitar la integración entre módulos.
+  - Uso de outputs para exponer información clave de los recursos y facilitar la integración entre módulos y la extensión de reglas de seguridad.
   - `export_env.sh` para la configuración del entorno.
  El código real y operativo se encuentra únicamente en las carpetas `Chapter_3/global` (recursos globales como IAM, S3) y `Chapter_3/stage` (servicios, VPC, etc. para el ambiente de stage).
  La carpeta `layout` es solo una estructura de referencia para planificar la organización futura, pero no contiene código Terraform ejecutable.
@@ -34,6 +36,7 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
 - Los servicios y recursos se organizan en subcarpetas para mantener el código DRY y modular.
 - Los scripts (`export_env.sh`) permiten una configuración repetible del entorno.
 - Los errores de ejemplo (por ejemplo, en `pruebas/main.tf`) son intencionados para aprendizaje.
+- Para extender reglas de seguridad, define reglas adicionales (`aws_security_group_rule`) en el root module usando el output del security group del módulo. Así puedes abrir puertos extra o reglas específicas por ambiente sin modificar el módulo base.
 
 ## Puntos de Integración
 - AWS es el proveedor principal; asegúrate de definir las credenciales mediante variables de entorno o archivos `.env`.
