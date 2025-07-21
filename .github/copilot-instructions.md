@@ -9,6 +9,14 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   - `pruebas/` contiene ejemplos, incluyendo errores de tipo intencionados para aprendizaje.
   - Estructura por ambientes (`stage`, `prod`, `mgmt`, `global`) y dominios (por ejemplo, `services/webserver-cluster`).
   - Cada servicio o dominio se organiza en subcarpetas con archivos `main.tf`, `variables.tf` y `outputs.tf` para parametrización y reutilización.
+  - Los módulos pueden ser referenciados como remotos desde GitHub usando tags de versión (`ref=v0.0.1`), lo que permite control de versiones y reutilización segura.
+  - Ejemplo de referencia:
+    ```hcl
+    module "web_cluster" {
+      source = "github.com/usuario/repositorio//ruta/modulo?ref=v0.0.1"
+      # variables...
+    }
+    ```
   - Los módulos deben exponer recursos clave (por ejemplo, IDs de security groups, nombres de ASG, DNS de ALB) mediante outputs en `outputs.tf`.
   - Para agregar reglas adicionales a un security group creado en un módulo, usa el output correspondiente (`security_group_id`) y crea recursos `aws_security_group_rule` en el root module o ambiente deseado, apuntando a ese ID. Así puedes personalizar reglas por ambiente sin modificar el módulo base.
   - Se recomienda la integración entre servicios usando `terraform_remote_state` para consumir outputs de otros stacks (por ejemplo, el clúster webserver obtiene la dirección y puerto de la base de datos MySQL).
@@ -16,7 +24,7 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   - Provisión de recursos globales (IAM, S3) bajo `global/`.
   - Uso de outputs para exponer información clave de los recursos y facilitar la integración entre módulos y la extensión de reglas de seguridad.
   - `export_env.sh` para la configuración del entorno.
- El código real y operativo se encuentra únicamente en las carpetas `Chapter_3/global` (recursos globales como IAM, S3) y `Chapter_3/stage` (servicios, VPC, etc. para el ambiente de stage).
+ El código real y operativo se encuentra en las carpetas `Chapter_3/global`, `Chapter_3/stage` y `Chapter_4/live` (servicios, VPC, etc. para los ambientes de stage y prod). Chapter_4 usa módulos remotos versionados para mayor flexibilidad.
  La carpeta `layout` es solo una estructura de referencia para planificar la organización futura, pero no contiene código Terraform ejecutable.
 
 ## Flujos de Trabajo Clave
