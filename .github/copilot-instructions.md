@@ -1,3 +1,21 @@
+## Chapter 5: Buenas prácticas avanzadas y recursos globales
+
+- Ejercicios de IAM y recursos globales en `Chapter_5/live/global/iam`.
+- Uso de variables tipo lista y bucles (`for_each`, `count`) para crear múltiples recursos dinámicamente (por ejemplo, usuarios IAM).
+- Ejemplo:
+  ```hcl
+  variable "user_names" {
+    description = "Create IAM users with these names"
+    type        = list(string)
+    default     = ["neo", "morpheus"]
+  }
+
+  resource "aws_iam_user" "users" {
+    for_each = toset(var.user_names)
+    name     = each.value
+  }
+  ```
+- Se recomienda documentar los gotchas y patrones comunes al usar loops y condicionales en Terraform.
 # Instrucciones Copilot para el Proyecto de Práctica con Terraform
 
 ## Descripción General

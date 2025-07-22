@@ -1,3 +1,29 @@
+- **Chapter_4**: Infraestructura modular avanzada usando módulos remotos versionados desde GitHub.
+  - Ejemplo de referencia de módulo:
+    ```hcl
+    module "web_cluster" {
+      source = "github.com/usuario/repositorio//ruta/modulo?ref=v0.0.1"
+      # variables...
+    }
+    ```
+  - Organización por ambientes (`live/stage`, `live/prod`).
+  - Uso de outputs para integración entre servicios y reglas de seguridad extendidas por ambiente.
+
+- **Chapter_5**: Recursos globales e IAM con loops y condicionales.
+  - Ejemplo de creación dinámica de usuarios IAM usando listas y `for_each`:
+    ```hcl
+    variable "user_names" {
+      description = "Create IAM users with these names"
+      type        = list(string)
+      default     = ["neo", "morpheus"]
+    }
+
+    resource "aws_iam_user" "users" {
+      for_each = toset(var.user_names)
+      name     = each.value
+    }
+    ```
+  - Prácticas recomendadas para loops, condicionales y gotchas en Terraform.
 # Proyecto de Práctica con Terraform
 
 Este proyecto contiene ejercicios y ejemplos prácticos realizados durante el estudio de **Terraform**, una herramienta de infraestructura como código (IaC) para la gestión de recursos en la nube, principalmente AWS.
