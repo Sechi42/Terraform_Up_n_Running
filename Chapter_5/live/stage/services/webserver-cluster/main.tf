@@ -4,7 +4,7 @@ provider "aws" {
 
 
 module "web_cluster" {
-    source = "github.com/Sechi42/Modules//services/webserver-cluster?ref=v0.0.1"
+    source = "../../../../modules/services/webserver-cluster"
 
     cluster_name            = "webservers-stage"
     db_remote_state_bucket  = "terraform-up-and-running-state-evolu"
@@ -13,6 +13,7 @@ module "web_cluster" {
     instance_type = "t2.micro"
     min_size      = 2
     max_size      = 2
+    enable_autoscaling = false
 }
 
 resource "aws_security_group_rule" "allow_testing_inbound" {

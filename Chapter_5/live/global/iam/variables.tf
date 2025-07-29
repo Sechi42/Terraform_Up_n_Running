@@ -12,5 +12,9 @@ variable "hero_thousand_faces" {
       "trinity"  = "love interest"
       "morpheus" = "mentor"
     }
-  
+}
+
+variable "give_neo_cloudwatch_full_access" {
+  description = "If true, neo gets full acces to Cloudwatch"
+  type = bool
 }
