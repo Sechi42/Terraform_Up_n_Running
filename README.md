@@ -67,4 +67,25 @@ terraform destroy   # Elimina la infraestructura creada
 - Se recomienda no compartir claves de acceso ni archivos de estado de Terraform públicamente.
 - El proyecto está organizado por capítulos para facilitar el aprendizaje progresivo.
 
----
+## Gestión y migración del estado de Terraform
+
+- Para mover recursos en el estado sin destruir ni recrear, usa `terraform state mv`.
+- El bloque `moved {}` en Terraform permite registrar cambios de nombre o ubicación de recursos en el código, facilitando el refactoring sin perder el historial del estado.
+- Si realizas cambios en la definición de recursos y `terraform plan` no muestra cambios, pero el recurso no se actualiza, revisa si necesitas usar `terraform state mv` o el bloque `moved {}`.
+- Cambiar el nombre, tipo o path de un recurso sin mover el estado puede causar duplicados, pérdida de historial o errores de drift.
+- Siempre revisa el plan antes de aplicar y valida que los cambios sean los esperados.
+
+Ejemplo de uso:
+```bash
+terraform state mv 'old_resource' 'new_resource'
+```
+
+Ejemplo de bloque moved en Terraform:
+```hcl
+moved {
+  from = aws_instance.old_name
+  to   = aws_instance.new_name
+}
+```
+
+Más información: https://developer.hashicorp.com/terraform/language/state/migrate

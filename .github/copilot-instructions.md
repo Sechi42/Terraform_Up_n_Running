@@ -110,6 +110,29 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   terraform destroy
   ```
 
+## Gestión avanzada del estado y refactorización
+
+- Usa `terraform state mv` para mover recursos en el estado sin destruirlos ni perder historial.
+- El bloque `moved {}` permite registrar cambios de nombre o path de recursos en el código, facilitando el refactoring seguro.
+- Si cambias el nombre, tipo o path de un recurso y `terraform plan` no muestra cambios, pero el recurso no se actualiza, revisa si necesitas usar `terraform state mv` o el bloque `moved {}`.
+- Cambios incorrectos pueden causar duplicados, drift o pérdida de historial en el estado.
+- Siempre valida el plan antes de aplicar y revisa los cambios esperados.
+
+Ejemplo de uso:
+```bash
+terraform state mv 'old_resource' 'new_resource'
+```
+
+Ejemplo de bloque moved en Terraform:
+```hcl
+moved {
+  from = aws_instance.old_name
+  to   = aws_instance.new_name
+}
+```
+
+Más información: https://developer.hashicorp.com/terraform/language/state/migrate
+
 ## Referencias
 - Consulta `README.md` para más detalles y contexto.
 - Archivos clave: `Chapter_2/main.tf`, `Chapter_2/export_env.sh`, `Chapter_3/global/`, `Chapter_3/stage/services/webserver-cluster/`, `Chapter_3/stage/services/webserver-cluster/variables.tf`, `Chapter_3/stage/services/webserver-cluster/outputs.tf`
