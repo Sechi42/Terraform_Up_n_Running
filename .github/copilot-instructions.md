@@ -16,6 +16,7 @@
   }
   ```
 - Se recomienda documentar los gotchas y patrones comunes al usar loops y condicionales en Terraform.
+
 # Instrucciones Copilot para el Proyecto de Práctica con Terraform
 
 ## Descripción General
@@ -42,8 +43,40 @@ Este repositorio es un proyecto práctico para aprender Terraform, enfocado en i
   - Provisión de recursos globales (IAM, S3) bajo `global/`.
   - Uso de outputs para exponer información clave de los recursos y facilitar la integración entre módulos y la extensión de reglas de seguridad.
   - `export_env.sh` para la configuración del entorno.
- El código real y operativo se encuentra en las carpetas `Chapter_3/global`, `Chapter_3/stage` y `Chapter_4/live` (servicios, VPC, etc. para los ambientes de stage y prod). Chapter_4 usa módulos remotos versionados para mayor flexibilidad.
- La carpeta `layout` es solo una estructura de referencia para planificar la organización futura, pero no contiene código Terraform ejecutable.
+
+El código real y operativo se encuentra en las carpetas `Chapter_3/global`, `Chapter_3/stage`, `Chapter_4/live` y `Chapter_6` (gestión de secretos, KMS, ejemplos de cifrado y desencriptado de credenciales). Chapter_4 y Chapter_6 usan módulos remotos versionados para mayor flexibilidad.
+La carpeta `layout` es solo una estructura de referencia para planificar la organización futura, pero no contiene código Terraform ejecutable.
+## Chapter 6: Gestión de secretos y KMS
+
+- Ejemplo de integración de AWS KMS para cifrado de secretos y uso de archivos encriptados para credenciales de base de datos.
+- Uso de `aws_kms_key`, `aws_kms_alias`, y `aws_kms_secrets` para desencriptar y consumir secretos en recursos como RDS.
+- Ejemplo de uso en `main.tf`:
+```hcl
+data "aws_kms_secrets" "creds" {
+  secret {
+    name    = "db"
+    payload = file("Chapter_6/Exploración/mysql-kms/db-creds.yml.encrypted")
+  }
+}
+
+locals {
+  db_creds = yamldecode(data.aws_kms_secrets.creds.plaintext["db"])
+}
+
+resource "aws_db_instance" "example" {
+  # ...
+  username = local.db_creds.username
+  password = local.db_creds.password
+}
+```
+
+Para cifrar secretos:
+```bash
+cd Chapter_6/Exploración/kms-cmk
+./encrypt.sh alias/kms-cmk-example us-east-2 db-creds.yml ../mysql-kms/db-creds.yml.encrypted
+```
+
+Luego puedes desplegar el stack de base de datos y consumir los secretos desencriptados automáticamente.
 
 ## Flujos de Trabajo Clave
 - **Comandos Terraform:**

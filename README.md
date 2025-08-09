@@ -89,3 +89,35 @@ moved {
 ```
 
 Más información: https://developer.hashicorp.com/terraform/language/state/migrate
+
+## Chapter 6: Gestión de secretos y KMS
+
+- Ejemplo de integración de AWS KMS para cifrado de secretos y uso de archivos encriptados para credenciales de base de datos.
+- Uso de `aws_kms_key`, `aws_kms_alias`, y `aws_kms_secrets` para desencriptar y consumir secretos en recursos como RDS.
+- Ejemplo de uso en `main.tf`:
+```hcl
+data "aws_kms_secrets" "creds" {
+  secret {
+    name    = "db"
+    payload = file("Chapter_6/Exploración/mysql-kms/db-creds.yml.encrypted")
+  }
+}
+
+locals {
+  db_creds = yamldecode(data.aws_kms_secrets.creds.plaintext["db"])
+}
+
+resource "aws_db_instance" "example" {
+  # ...
+  username = local.db_creds.username
+  password = local.db_creds.password
+}
+```
+
+Para cifrar secretos:
+```bash
+cd Chapter_6/Exploración/kms-cmk
+./encrypt.sh alias/kms-cmk-example us-east-2 db-creds.yml ../mysql-kms/db-creds.yml.encrypted
+```
+
+Luego puedes desplegar el stack de base de datos y consumir los secretos desencriptados automáticamente.
