@@ -49,6 +49,39 @@ resource "aws_instance" "region_2" {
 ```
 
 Este patrón permite desplegar recursos en paralelo en varias regiones AWS desde un solo stack de Terraform.
+
+### Ejemplo avanzado: MySQL multi-región (primaria y réplica)
+
+También puedes desplegar una base de datos MySQL primaria en una región y una réplica en otra usando módulos y providers con alias:
+
+```hcl
+provider "aws" {
+  region = "us-east-2"
+  alias  = "primary"
+}
+
+provider "aws" {
+  region = "us-west-1"
+  alias  = "replica"
+}
+
+module "mysql_primary" {
+  source = "../../../../modules/data-stores/mysql"
+  providers = { aws = aws.primary }
+  db_name = "prod_db"
+  db_username = var.db_username
+  db_password = var.db_password
+  backup_retention_period = 1
+}
+
+module "mysql_replica" {
+  source = "../../../../modules/data-stores/mysql"
+  providers = { aws = aws.replica }
+  replicate_source_db = module.mysql_primary.arn
+}
+```
+
+Esto permite alta disponibilidad y recuperación ante desastres entre regiones AWS usando Terraform.
 - **Chapter_4**: Infraestructura modular avanzada usando módulos remotos versionados desde GitHub.
   - Ejemplo de referencia de módulo:
     ```hcl

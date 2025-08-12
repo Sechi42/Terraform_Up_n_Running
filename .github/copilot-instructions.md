@@ -49,6 +49,47 @@ resource "aws_instance" "region_2" {
 ```
 
 Este patrón permite desplegar recursos en paralelo en varias regiones AWS desde un solo stack de Terraform.
+
+### Modularización y réplicas multi-región con múltiples providers
+
+Para crear recursos dependientes en varias regiones (por ejemplo, una base de datos primaria y una réplica), sigue este patrón:
+
+1. Declara un provider por cada región, usando `alias`:
+   ```hcl
+   provider "aws" {
+     region = "us-east-2"
+     alias  = "primary"
+   }
+
+   provider "aws" {
+     region = "us-west-1"
+     alias  = "replica"
+   }
+   ```
+
+2. Haz tus módulos agnósticos al provider (no declares provider dentro del módulo, solo usa recursos de AWS).
+
+3. Al instanciar el módulo, usa el argumento `providers` para asignar el provider adecuado:
+   ```hcl
+   module "mysql_primary" {
+     source = "../../../../modules/data-stores/mysql"
+     providers = { aws = aws.primary }
+     db_name = "prod_db"
+     db_username = var.db_username
+     db_password = var.db_password
+     backup_retention_period = 1
+   }
+
+   module "mysql_replica" {
+     source = "../../../../modules/data-stores/mysql"
+     providers = { aws = aws.replica }
+     replicate_source_db = module.mysql_primary.arn
+   }
+   ```
+
+4. En el módulo, usa condicionales para que los parámetros obligatorios solo se requieran cuando sean necesarios (por ejemplo, username/password solo si no es réplica).
+
+Este patrón permite crear infraestructuras multi-región, con recursos dependientes y alta disponibilidad, de forma DRY y reutilizable.
 ## Chapter 5: Buenas prácticas avanzadas y recursos globales
 
 - Ejercicios de IAM y recursos globales en `Chapter_5/live/global/iam`.
