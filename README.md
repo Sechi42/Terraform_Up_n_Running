@@ -205,3 +205,24 @@ cd Chapter_6/Exploración/kms-cmk
 ```
 
 Luego puedes desplegar el stack de base de datos y consumir los secretos desencriptados automáticamente.
+
+## Chapter 8: Módulos y ejemplos adicionales
+
+El directorio `Chapter_8` contiene ejemplos y módulos adicionales organizados en dos áreas principales:
+
+- `Exploración/`: ejemplos y estados de trabajo para pruebas y aprendizaje (contiene `main.tf`, `terraform.tfstate` y `.terraform` con providers instalados localmente).
+- `live/`: estructura por ambientes con subcarpetas `global`, `prod` y `stage`. Dentro de `live` hay ejemplos de:
+  - `global/iam` y `global/s3` con recursos para IAM y buckets S3.
+  - `prod` y `stage` con ejemplos de `data-stores/mysql` y `services/webserver-cluster` (cada uno incluye `main.tf`, `outputs.tf` y archivos de estado de ejemplo).
+
+Además `Chapter_8/modules` contiene módulos reutilizables detectados:
+- `cluster/asg-rolling-deploy`: plantilla para despliegues con Auto Scaling y rolling updates.
+- `data-stores/mysql`: módulo orientado a bases de datos MySQL.
+- `networking/alb`: módulo para ALB (listeners, target groups y reglas).
+- `services/hello-world-app`: módulo para desplegar una aplicación sencilla (user-data y variables incluidas).
+
+Recomendaciones rápidas:
+- Revisa y limpia los archivos `.terraform` y `terraform.tfstate` en `Exploración/` antes de usarlos como referencia; esos estados pueden contener datos sensibles.
+- Usa `terraform init` en cada ejemplo antes de ejecutar `plan`/`apply`.
+- Normaliza outputs y variables si vas a referenciar módulos entre capítulos.
+

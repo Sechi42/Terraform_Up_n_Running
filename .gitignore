@@ -15,3 +15,5 @@ Thumbs.db
 # Ignore compiled Python files
 __pycache__/
 *.py[cod]
+
+terraform-up-and-running-code

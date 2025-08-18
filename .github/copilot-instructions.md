@@ -264,3 +264,20 @@ Más información: https://developer.hashicorp.com/terraform/language/state/migr
 
 ---
 Edita este archivo para actualizar la guía de codificación específica del proyecto.
+
+## Chapter 8: Resumen y módulos detectados
+
+El directorio `Chapter_8` incluye ejemplos adicionales y módulos reutilizables. Resumen rápido:
+
+- `Exploración/`: ejemplos con estados de prueba (`.terraform`, `terraform.tfstate`) y archivos de ejemplo para tests.
+- `live/`: organización por ambientes (`global`, `prod`, `stage`) con ejemplos de `iam`, `s3`, `data-stores/mysql` y `services/webserver-cluster`.
+- `modules/` incluye submódulos como:
+  - `cluster/asg-rolling-deploy` — plantilla para ASG con rolling updates.
+  - `data-stores/mysql` — módulo para MySQL.
+  - `networking/alb` — módulo para ALB/target groups/listeners.
+  - `services/hello-world-app` — aplicación ejemplo con `user-data`.
+
+Notas de seguridad: elimina o ignora los `.terraform` y `terraform.tfstate` en `Exploración/` si vas a compartir el repositorio.
+
+---
+Edita esta guía cuando añadas nuevos módulos o reorganices capítulos.
