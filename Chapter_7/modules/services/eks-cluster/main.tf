@@ -31,14 +31,16 @@ data "aws_vpc" "default" {
 data "aws_subnets" "default" {
     filter {
       name = "vpc-id"
-      values = [data.aws_vpc.default.if]
+      values = [data.aws_vpc.default.id]
     }
 }
 
 resource "aws_eks_cluster" "cluster" {
   name     = var.name
   role_arn = aws_iam_role.cluster.arn
-  version  = "1.21"
+  # version is intentionally omitted so AWS chooses a supported default.
+  # If you want to pin a specific Kubernetes version, set it via a variable
+  # and ensure the version is supported in the target region.
 
   vpc_config {
     subnet_ids = data.aws_subnets.default.ids
@@ -56,7 +58,7 @@ resource "aws_eks_cluster" "cluster" {
 
 resource "aws_iam_role" "node_group" {
   name = "${var.name}-node_group"
-  assume_role_policy = data.aws_iam_policy_document.cluster_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.node_assume_role.json
   
 }
 
@@ -64,7 +66,7 @@ resource "aws_iam_role" "node_group" {
 data "aws_iam_policy_document" "node_assume_role" {
   statement {
     effect = "Allow"
-    actions = ["sts_AssumeRole"]
+  actions = ["sts:AssumeRole"]
     principals {
       type = "Service"
       identifiers = ["ec2.amazonaws.com"]
@@ -78,8 +80,8 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   role       = aws_iam_role.node_group.name
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonEC2ConatinerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ConatinerRegistryReadOnly"
+resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.node_group.name
 }
 
@@ -106,7 +108,7 @@ resource "aws_eks_node_group" "nodes" {
   # y las interfaces de red elásticas (ENI) sin estas dependencias.
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.AmazonEC2ConatinerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
   ]
 }
